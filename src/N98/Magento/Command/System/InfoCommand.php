@@ -43,10 +43,10 @@ class InfoCommand extends AbstractMagentoCommand
 
         $this->initMagento();
 
-        $this->infos['Version'] = \Mage::getVersion();
+        $this->infos['Version'] = $this->_getVersion();
         $this->infos['Edition'] = ($this->_magentoEnterprise ? 'Enterprise' : 'Community');
 
-        $config = \Mage::app()->getConfig();
+        $config = $this->_getConfig();
         $this->_addCacheInfos();
 
         $this->infos['Session'] = $config->getNode('global/session_save');
@@ -81,6 +81,21 @@ class InfoCommand extends AbstractMagentoCommand
                 break;
 
             default:
+        }
+    }
+
+    /**
+     * @return string
+     */
+    protected function _getVersion()
+    {
+        if ($this->getApplication()->isMagento2()) {
+            $app = $this->getApplication()->getLocator()->get('\Magento\Core\Model\App');
+            return $app->getVersion();
+
+        } else {
+
+            return \Mage::getVersion();
         }
     }
 
@@ -141,5 +156,19 @@ class InfoCommand extends AbstractMagentoCommand
 
             $this->infos['Vendors (' . $codePool . ')'] = implode(', ', $vendors);
         }
+    }
+
+    /**
+     * @return mixed
+     */
+    protected function _getConfig()
+    {
+        if ($this->getApplication()->isMagento2()) {
+            $config = $this->getApplication()->getLocator()->get('Magento\Core\Model\Session\Config');
+        } else {
+            $config = \Mage::app()->getConfig();
+        }
+
+        return $config;
     }
 }

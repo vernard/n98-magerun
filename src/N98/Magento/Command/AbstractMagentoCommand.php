@@ -297,8 +297,8 @@ abstract class AbstractMagentoCommand extends Command
      */
     protected function _getModel($mage1code, $mage2class)
     {
-        if ($this->_magentoMajorVersion == self::MAGENTO_MAJOR_VERSION_2) {
-            return \Mage::getModel($mage2class);
+        if ($this->getApplication()->isMagento2()) {
+            return $this->getApplication()->getLocator()->get($mage2class);
         } else {
             return \Mage::getModel($mage1code);
         }

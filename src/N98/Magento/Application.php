@@ -112,6 +112,13 @@ class Application extends BaseApplication
     protected $_directRootDir = false;
 
     /**
+     * Magento2 object locator (only available in in Magento 2 instances)
+     *
+     * @var \Magento\App\ObjectManagerFactory
+     */
+    protected $_locator;
+
+    /**
      * @param \Composer\Autoload\ClassLoader $autoloader
      */
     public function __construct($autoloader = null)
@@ -431,6 +438,14 @@ class Application extends BaseApplication
     }
 
     /**
+     * @return bool
+     */
+    public function isMagento2()
+    {
+        return $this->getMagentoMajorVersion() == self::MAGENTO_MAJOR_VERSION_2;
+    }
+
+    /**
      * @return \Composer\Autoload\ClassLoader
      */
     public function getAutoloader()
@@ -444,6 +459,22 @@ class Application extends BaseApplication
     public function setAutoloader($autoloader)
     {
         $this->autoloader = $autoloader;
+    }
+
+    /**
+     * @param \Magento\App\ObjectManagerFactory $locator
+     */
+    public function setLocator($locator)
+    {
+        $this->_locator = $locator;
+    }
+
+    /**
+     * @return \Magento\App\ObjectManagerFactory
+     */
+    public function getLocator()
+    {
+        return $this->_locator;
     }
 
     /**
@@ -631,24 +662,14 @@ class Application extends BaseApplication
         if ($this->_magento2EntryPoint === null) {
             require_once $this->getMagentoRootFolder() . '/app/bootstrap.php';
 
-            if (version_compare(\Mage::getVersion(), '2.0.0.0-dev42') >= 0) {
-                $params = array(
-                    \Mage::PARAM_RUN_CODE => 'admin',
-                    \Mage::PARAM_RUN_TYPE => 'store',
-                    'entryPoint'          => basename(__FILE__),
-                );
-                try {
-                    $this->_magento2EntryPoint = new MagerunEntryPoint(BP, $params);
-                } catch (\Exception $e) {
-                    // @TODO problem with objectmanager during tests. Find a better soluttion to reset object manager
-                }
-            } else {
-                if (version_compare(\Mage::getVersion(), '2.0.0.0-dev41') >= 0) {
-                    \Mage::app(array('MAGE_RUN_CODE' => 'admin'));
-                } else {
-                    \Mage::app('admin');
-                }
-            }
+            $params = array(
+                \Magento\Core\Model\App::PARAM_RUN_CODE => 'admin',
+                \Magento\Core\Model\App::PARAM_RUN_TYPE => 'store',
+            );
+
+            $entryPoint = new \N98\Magento2\Application\MagerunEntryPoint(BP, $params);
+            $entryPoint->run('n98-magerun', array());
+            $this->_locator = $entryPoint->getLocator();
         }
     }
 

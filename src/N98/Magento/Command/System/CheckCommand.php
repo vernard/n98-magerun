@@ -278,7 +278,7 @@ HELP;
     protected function _checkSetting($output, $checkType, $configPath, $errorMessage, \Closure $check)
     {
         $errors = 0;
-        foreach (\Mage::app()->getStores() as $store) {
+        foreach ($this->_getStores() as $store) {
             $configValue = \Mage::getStoreConfig($configPath, $store);
             if (!$check($configValue, $store)) {
                 $output->writeln(
@@ -290,5 +290,17 @@ HELP;
         if ($errors === 0) {
             $output->writeln('<comment>' . $checkType . '</comment> <info>OK</info>');
         }
+    }
+
+    /**
+     * @return mixed
+     */
+    protected function _getStores()
+    {
+        if ($this->getApplication()->isMagento2()) {
+            $storeManager = $this->getApplication()->getLocator()->get('Magento\Core\Model\StoreManagerInterface');
+            return $storeManager->getStores();
+        }
+        return \Mage::app()->getStores();
     }
 }
