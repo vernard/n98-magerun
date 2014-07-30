@@ -139,6 +139,7 @@ commands:
     - Manadev\Magento\Command\DownloadCommand
     - Manadev\Magento\Command\InstallCommand
     - Manadev\Util\Command\CreateComposerCommand
+    - Manadev\Util\Command\CreateModmanCommand
 
   aliases: []
 
