@@ -28,7 +28,8 @@
     "autoload": {
         "psr-0": {
             "N98": "src",
-            "Composer": "src"
+            "Composer": "src",
+            "Manadev": "src"
         }
     },
     "authors": [

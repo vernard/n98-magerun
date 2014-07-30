@@ -136,6 +136,8 @@ commands:
     - "composer:validate": Composer\Command\ValidateCommand
     - "composer:search": Composer\Command\SearchCommand
     - "composer:diagnose": Composer\Command\DiagnoseCommand
+    - Manadev\Magento\Command\DownloadCommand
+    - Manadev\Magento\Command\InstallCommand
 
   aliases: []
 
@@ -379,3 +381,7 @@ commands:
         - catalog/product/cache
         - css
         - js
+
+  Manadev\Magento\Command\DownloadCommand:
+    remote-repository: git://github.com/manadev/magento.git
+    local-repository: %TMP%/magento
