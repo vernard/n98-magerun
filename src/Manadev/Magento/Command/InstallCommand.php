@@ -29,7 +29,7 @@ class InstallCommand extends AbstractMagentoCommand {
         $local = str_replace("%TMP%", getenv('TMP'), $local);
         $local = realpath($local);
         if(!file_exists($local)){
-            $output->writeln("<error>Local magento repository not found. Downloading...</error>", true);
+            $output->writeln("<error>Local magento repository not found. Downloading...</error>");
             $this->getApplication()->setAutoExit(false);
             $this->getApplication()->run(new StringInput('download'), $output);
             $this->getApplication()->setAutoExit(true);
