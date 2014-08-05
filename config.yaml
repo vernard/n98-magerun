@@ -138,6 +138,7 @@ commands:
     - "composer:diagnose": Composer\Command\DiagnoseCommand
     - Manadev\Magento\Command\DownloadCommand
     - Manadev\Magento\Command\InstallCommand
+    - Manadev\Magento\Command\SyncCommand
     - Manadev\Magento\Command\CreateComposerCommand
     - Manadev\Magento\Command\CreateModmanCommand
 
