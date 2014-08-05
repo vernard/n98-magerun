@@ -30,7 +30,13 @@ class SyncCommand extends AbstractMagentoCommand {
                       "s",
                       InputOption::VALUE_NONE,
                       "Shows the list of deleted symlinks"
-                  )
+                  ),
+                    new InputOption(
+                        "skipSymlinkDelete",
+                        null,
+                        InputOption::VALUE_NONE,
+                        "Skips the deletion of symlink"
+                    ),
                 ));
     }
 
@@ -42,12 +48,15 @@ class SyncCommand extends AbstractMagentoCommand {
 
         $ignoredFiles = array_merge($ignoredFiles, $this->getIgnoreList());
 
-        $output->writeln("<info>Cleaning symlinks...</info>");
-
-        $this->getApplication()->setAutoExit(false);
-        $delsymlinkOutput = ($input->getOption("showDeletedSymlinks")) ? null : new NullOutput();
-        $this->getApplication()->run(new StringInput('delsymlink'), $delsymlinkOutput);
-        $this->getApplication()->setAutoExit(true);
+        if($input->getOption("skipSymlinkDelete")){
+            $output->writeln("<comment>Symlink deletion skipped.</comment>");
+        } else {
+            $output->writeln("<info>Cleaning symlinks...</info>");
+            $this->getApplication()->setAutoExit(false);
+            $delsymlinkOutput = ($input->getOption("showDeletedSymlinks")) ? null : new NullOutput();
+            $this->getApplication()->run(new StringInput('delsymlink'), $delsymlinkOutput);
+            $this->getApplication()->setAutoExit(true);
+        }
 
         foreach($extensions as $extension)
         {
