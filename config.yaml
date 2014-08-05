@@ -142,6 +142,7 @@ commands:
     - Manadev\Magento\Command\SyncCommand
     - Manadev\Magento\Command\CreateComposerCommand
     - Manadev\Magento\Command\CreateModmanCommand
+    - Manadev\Magento\Command\RemoveSymlinksCommand
 
 
   aliases: []
@@ -394,3 +395,6 @@ commands:
   Manadev\Magento\Command\DownloadCommand:
     remote-repository: git://github.com/manadev/magento.git
     local-repository: %TMP%/magento
+
+iterator_filter:
+  - node_modules

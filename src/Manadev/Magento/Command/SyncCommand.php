@@ -13,6 +13,9 @@ use N98\Magento\Command\AbstractMagentoCommand;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
+use Symfony\Component\Console\Input\StringInput;
+use Symfony\Component\Console\Output\NullOutput;
 use Symfony\Component\Console\Output\OutputInterface;
 
 class SyncCommand extends AbstractMagentoCommand {
@@ -20,7 +23,15 @@ class SyncCommand extends AbstractMagentoCommand {
     protected function configure()
     {
         $this->setName("sync")
-            ->setDescription("Install extensions that are added in .team-config file");
+            ->setDescription("Install extensions that are added in .team-config file")
+            ->setDefinition(array(
+                  new InputOption(
+                      "showDeletedSymlinks",
+                      "s",
+                      InputOption::VALUE_NONE,
+                      "Shows the list of deleted symlinks"
+                  )
+                ));
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)
@@ -32,20 +43,11 @@ class SyncCommand extends AbstractMagentoCommand {
         $ignoredFiles = array_merge($ignoredFiles, $this->getIgnoreList());
 
         $output->writeln("<info>Cleaning symlinks...</info>");
-        foreach ($this->getExtensionList() as $extension) {
-            $extension = new MSyncExtension($extension);
-            foreach($extension->getProjectFileList() as $file)
-            {
-                if (file_exists($file) && is_link($file))
-                {
-                    $file = str_replace('/', '\\', $file);
-                    if(is_dir($file))
-                        exec("rmdir ".$file);
-                    else
-                        exec("del ". $file);
-                }
-            }
-        }
+
+        $this->getApplication()->setAutoExit(false);
+        $delsymlinkOutput = ($input->getOption("showDeletedSymlinks")) ? null : new NullOutput();
+        $this->getApplication()->run(new StringInput('delsymlink'), $delsymlinkOutput);
+        $this->getApplication()->setAutoExit(true);
 
         foreach($extensions as $extension)
         {
