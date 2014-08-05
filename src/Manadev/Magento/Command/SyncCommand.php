@@ -37,7 +37,13 @@ class SyncCommand extends AbstractMagentoCommand {
             foreach($extension->getProjectFileList() as $file)
             {
                 if (file_exists($file) && is_link($file))
-                    exec("rm -rf ".$file);
+                {
+                    $file = str_replace('/', '\\', $file);
+                    if(is_dir($file))
+                        exec("rmdir ".$file);
+                    else
+                        exec("del ". $file);
+                }
             }
         }
 
