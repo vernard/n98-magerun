@@ -28,10 +28,10 @@ class SyncCommand extends AbstractMagentoCommand {
             ->setDescription("Install extensions that are added in .team-config file")
             ->setDefinition(array(
                   new InputOption(
-                      "showDeletedSymlinks",
-                      "s",
+                      "debug",
+                      "d",
                       InputOption::VALUE_NONE,
-                      "Shows the list of deleted symlinks"
+                      "Shows the list of extensions found, and deleted symlinks"
                   ),
                     new InputOption(
                         "skipSymlinkDelete",
@@ -48,17 +48,20 @@ class SyncCommand extends AbstractMagentoCommand {
         $ignoredFiles = $this->addToIgnoredFiles($this->getIgnoreList());
 
         $output->writeln("<info>Finding extensions...</info>");
+        $isDebug = (boolean) $input->getOption("debug");
         $extensions = $this->getExtensionList();
+        if($isDebug) {
+            foreach($extensions as $extension) {
+                $output->writeln("<info>Module found: {$extension}</info>");
+            }
+        }
 
 
-        if($input->getOption("skipSymlinkDelete")){
+        if ($input->getOption("skipSymlinkDelete")) {
             $output->writeln("<comment>Symlink deletion skipped.</comment>");
         } else {
             $output->writeln("<info>Cleaning symlinks...</info>");
-            $this->getApplication()->setAutoExit(false);
-            $delsymlinkOutput = ($input->getOption("showDeletedSymlinks")) ? null : new NullOutput();
-            $this->getApplication()->run(new StringInput('delsymlink'), $delsymlinkOutput);
-            $this->getApplication()->setAutoExit(true);
+            $this->doCleanSymlinks($isDebug);
         }
 
         foreach($extensions as $extension)
@@ -138,5 +141,15 @@ class SyncCommand extends AbstractMagentoCommand {
         $this->ignoredFiles = $ignoredFiles;
 
         return $ignoredFiles;
+    }
+
+    /**
+     * @param boolean $isDebug
+     */
+    protected function doCleanSymlinks($isDebug) {
+        $this->getApplication()->setAutoExit(false);
+        $delsymlinkOutput = ($isDebug) ? null : new NullOutput();
+        $this->getApplication()->run(new StringInput('delsymlink'), $delsymlinkOutput);
+        $this->getApplication()->setAutoExit(true);
     }
 } 
