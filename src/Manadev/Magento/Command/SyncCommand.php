@@ -20,6 +20,8 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 class SyncCommand extends AbstractMagentoCommand {
 
+    protected $ignoredFiles = array();
+
     protected function configure()
     {
         $this->setName("sync")
@@ -42,11 +44,12 @@ class SyncCommand extends AbstractMagentoCommand {
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
+        // Get ignored file list from our gitignore template
+        $ignoredFiles = $this->addToIgnoredFiles($this->getIgnoreList());
+
         $output->writeln("<info>Finding extensions...</info>");
         $extensions = $this->getExtensionList();
-        $ignoredFiles = array();
 
-        $ignoredFiles = array_merge($ignoredFiles, $this->getIgnoreList());
 
         if($input->getOption("skipSymlinkDelete")){
             $output->writeln("<comment>Symlink deletion skipped.</comment>");
@@ -83,7 +86,7 @@ class SyncCommand extends AbstractMagentoCommand {
         }
 
         $output->writeln("<info>Creating .gitignore file...</info>");
-        $this->createGitIgnoreFile($ignoredFiles);
+        $this->createGitIgnoreFile();
     }
 
     /**
@@ -120,7 +123,20 @@ class SyncCommand extends AbstractMagentoCommand {
      *
      * @param array $ignoredFiles Lines of .gitignore file.
      */
-    protected function createGitIgnoreFile($ignoredFiles) {
+    protected function createGitIgnoreFile($ignoredFiles = null) {
+        if(is_null($ignoredFiles))
+            $ignoredFiles = $this->ignoredFiles;
         file_put_contents(getcwd()."/.gitignore", implode($ignoredFiles, "\r\n"));
+    }
+
+    /**
+     * @param $ignoredFiles
+     * @return array
+     */
+    protected function addToIgnoredFiles($ignoredFiles) {
+        $ignoredFiles = array_merge($this->ignoredFiles ,$ignoredFiles);
+        $this->ignoredFiles = $ignoredFiles;
+
+        return $ignoredFiles;
     }
 } 
