@@ -29,6 +29,9 @@ class SymlinkMap {
     }
 
     public function createSymlink() {
+        $symlinkDir = dirname($this->getTarget());
+        if(!file_exists($symlinkDir))
+            mkdir($symlinkDir);
         // Creating symlinks seem to work but it shows some warning.
         // Used shut up operator to hide that warning.
         @symlink($this->getSource(), $this->getTarget());

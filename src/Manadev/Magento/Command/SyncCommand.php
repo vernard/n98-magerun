@@ -6,6 +6,7 @@
 
 namespace Manadev\Magento\Command;
 
+use Manadev\Util\Modman;
 use Manadev\Util\MSyncExtension;
 use Manadev\Util\SymlinkMap;
 use Manadev\Util\TeamConfig;
@@ -67,7 +68,7 @@ class SyncCommand extends AbstractMagentoCommand {
         foreach($extensions as $extension)
         {
             $output->writeln("<info>Installing extension:\n\t{$extension}</info>");
-            $extension = new MSyncExtension($extension);
+            $extension = new Modman($extension);
 
             $extensionSymlinks = $extension->getProjectFileList();
             foreach($extensionSymlinks as $key=>$value)
@@ -110,10 +111,8 @@ class SyncCommand extends AbstractMagentoCommand {
 
                 foreach ($modules as $module) {
                     $moduleDir = $modulesDir . "\\{$module}";
-                    if (file_exists($moduleDir . "\\extension.xml")) {
+                    if (file_exists($moduleDir . "\\modman")) {
                         $extensions[] = $moduleDir;
-                    } else {
-                        break;
                     }
                 }
             }
