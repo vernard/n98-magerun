@@ -398,3 +398,4 @@ commands:
 
 iterator_filter:
   - node_modules
+  - vendor
