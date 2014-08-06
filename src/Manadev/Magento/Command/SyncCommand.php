@@ -45,7 +45,7 @@ class SyncCommand extends AbstractMagentoCommand {
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         // Get ignored file list from our gitignore template
-        $ignoredFiles = $this->addToIgnoredFiles($this->getIgnoreList());
+        $this->addToIgnoredFiles($this->getIgnoreList());
 
         $output->writeln("<info>Finding extensions...</info>");
         $isDebug = (boolean) $input->getOption("debug");
@@ -66,25 +66,19 @@ class SyncCommand extends AbstractMagentoCommand {
 
         foreach($extensions as $extension)
         {
-            $teamConfig = new TeamConfig(getcwd()."/.team-config", $extensions, getcwd()."/vendor");
+            $output->writeln("<info>Installing extension:\n\t{$extension}</info>");
+            $extension = new MSyncExtension($extension);
 
-            if(in_array(realpath($extension), $teamConfig->getIncludedDirectories()))
+            $extensionSymlinks = $extension->getProjectFileList();
+            foreach($extensionSymlinks as $key=>$value)
             {
-                $output->writeln("<info>Installing extension:\n\t{$extension}</info>");
-                $extension = new MSyncExtension($extension);
+                $extensionSymlinks[$key] = str_replace(getcwd(),"",$value);
+            }
 
-                $extensionSymlinks = $extension->getProjectFileList();
-                foreach($extensionSymlinks as $key=>$value)
-                {
-                    $extensionSymlinks[$key] = str_replace(getcwd(),"",$value);
-                }
-                
-                $ignoredFiles = array_merge($ignoredFiles, $extensionSymlinks);
-                /** @var $map SymlinkMap */
-                foreach ($extension->getSymlinkMaps() as $map) {
-                    $map->createSymlink();
-                }
-
+            $this->addToIgnoredFiles($extensionSymlinks);
+            /** @var $map SymlinkMap */
+            foreach ($extension->getSymlinkMaps() as $map) {
+                $map->createSymlink();
             }
         }
 
@@ -103,11 +97,28 @@ class SyncCommand extends AbstractMagentoCommand {
             return $this->extensionlist;
 
         $extensions = [];
-        $it = new RecursiveDirectoryIterator(getcwd() . "/vendor");
-        foreach (new RecursiveIteratorIterator($it) as $file) {
-            if (basename($file) === "extension.xml")
-                $extensions[] = dirname($file);
+
+        $vendorDir = getcwd() . "\\vendor";
+        $vendors = scandir($vendorDir);
+        unset($vendors[0]); unset($vendors[1]);
+
+        foreach ($vendors as $vendor) {
+            if(is_dir($vendorDir."\\{$vendor}")) {
+                $modulesDir = $vendorDir . "\\{$vendor}";
+                $modules = scandir($modulesDir);
+                unset($modules[0]); unset($modules[1]);
+
+                foreach ($modules as $module) {
+                    $moduleDir = $modulesDir . "\\{$module}";
+                    if (file_exists($moduleDir . "\\extension.xml")) {
+                        $extensions[] = $moduleDir;
+                    } else {
+                        break;
+                    }
+                }
+            }
         }
+
         $this->extensionlist = $extensions;
         return $extensions;
     }
