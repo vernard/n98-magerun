@@ -36,7 +36,7 @@ class RemoveSymlinksCommand extends AbstractMagentoCommand
                 else{
                     exec("del " . $file);
                 }
-                $output->writeln("<info>Symlink deleted: {$file}</info>");
+                $output->writeln("<error>Symlink deleted: {$file}</error>");
             }
         }
     }
